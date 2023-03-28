@@ -8,13 +8,47 @@ const HomePage = () => {
   const [quote, setQuote] = useState("");
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [quoteLoadingError, setQuoteLoadingError] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+  const [user, setUser] = useState({
+    name: "",
+    occupation:""
+  })
+
+  let api_key;
+
+  if (typeof window !== 'undefined') {
+    api_key = localStorage.getItem("API_KEY")
+  } 
+
+  const [key, setKey] = useState<string | null>(api_key ? api_key : null);
+  const [init, setInit] = useState(false);
+
+  async function keyStore() {
+    setInit(true)
+    if (typeof window !== 'undefined') {
+     localStorage.setItem("API_KEY", JSON.stringify(key))
+    }   
+
+    try {
+      const response = await fetch('https://x8ki-letl-twmt.n7.xano.io/api:6NNm23Cg/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(user),
+      });
+  
+      const data = await response.json();
+      console.log('Response:', data);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const formData = new FormData(e.target as HTMLFormElement);
     const prompt = formData.get("prompt")?.toString().trim();
-
-    console.log(prompt)
 
     if (prompt) {
       try {
@@ -22,7 +56,7 @@ const HomePage = () => {
         setQuoteLoadingError(false);
         setQuoteLoading(true);
 
-        const response = await fetch("/api/gptapi?prompt=" + prompt);
+        const response = await fetch(`/api/gptapi?prompt=${prompt}&key=${key}`);
         const body = await response.json();
         setQuote(body.quote);
       } catch (error) {
@@ -42,7 +76,7 @@ const HomePage = () => {
         setQuoteLoadingError(false);
         setQuoteLoading(true);
 
-        const response = await fetch("/api/gptapi?prompt=" + text);
+        const response = await fetch(`/api/gptapi?prompt=${text}&key=${key}`);
         const body = await response.json();
         setQuote(body.quote);
       } catch (error) {
@@ -55,6 +89,11 @@ const HomePage = () => {
     }
   }
 
+  const handleChange = (e: any) => {
+    const { name, value } = e.target;
+    setUser({ ...user, [name]: value });
+  }
+
   let regex = /^[^\S\n]*\d+\..*(?:\n(?![^\S\n]*\d+\.).*)*/gm;
   let matches = quote.match(regex);
   
@@ -63,26 +102,73 @@ const HomePage = () => {
     alert('Text copied')
   }
 
+  useEffect(() => {
+      setHydrated(true);
+  }, []);
+
+  if (!hydrated) {
+    return null;
+  }
+
   return (
-    <div className="h-100 w-100 d-flex flex-column justify-content-start align-items-center position-relative mt-5 pt-5">
+    <div className="w-100 h-auto d-flex flex-column justify-content-start align-items-center mt-5 pt-5">
         <div className="w-75">
-          <h1>Chat GPT Prompt Generator</h1>
-          <h2>powered by GPT-3</h2>
-          <div className="my-5">Enter a topic/prompt and generate prompt variations.</div>
+          <h1 className="display-1 mb-4">Re-Prompt</h1>
+          <h3>Prompt Generator powered by GPT-3</h3>
+          {(init || api_key !== null) ? (<div className="my-5">Enter a topic/prompt and generate prompt variations.</div>)
+          : (<div className="my-5">Please enter your details to continue.</div>)}
         </div>
-          <Form onSubmit={handleSubmit} className={`${styles.inputForm}`}>
-            <Form.Group className='mb-3' controlId='prompt-input'>
-              <Form.Control
-                name='prompt'
-                placeholder='e.g. Email marketing, Fourier transform, linear regression model...'
-              />
-            </Form.Group>
-            <div className="d-flex flex-column justify-content-center align-items-center">
-              <Button type='submit' className='my-3 w-25' disabled={quoteLoading}>
-                Submit
-              </Button>            
-            </div>
-          </Form>
+          <div className="d-flex justify-content-center w-100">
+            <Form onSubmit={handleSubmit} className={`${styles.inputForm} d-flex flex-column justify-content-center align-items-center`}>
+              <Form.Group className='mb-3 w-75' controlId='prompt-input'>
+                {(api_key === null) && 
+                (<div>
+                  <div className="d-flex justify-content-between w-100 align-items-center p-3">
+                    <Form.Label className="text-nowrap">Name</Form.Label>
+                    <Form.Control
+                      className="w-75 ms-3"
+                      name='name'
+                      onChange={(e) => handleChange(e)}
+                    />
+                  </div>
+                  <div className="d-flex justify-content-between w-100 align-items-center p-3">
+                    <Form.Label className="text-nowrap">What do you do?</Form.Label>
+                    <Form.Control
+                      className="w-75 ms-3"
+                      name='occupation'
+                      onChange={(e) => handleChange(e)}
+                    />
+                  </div>
+                  <div className="d-flex justify-content-between w-100 align-items-center p-3">
+                    <Form.Label className="text-nowrap">Open AI API key :</Form.Label>
+                    <Form.Control
+                      className="w-75 ms-3"
+                      name='api_key'
+                      onChange={(e) => setKey(e.target.value)}
+                    />
+                  </div>
+                  <Button disabled={user.name && user.occupation ? false : true} onClick={() => keyStore()} className='my-3 w-25'>
+                    Submit
+                  </Button>  
+                </div>)}
+                {(init || api_key !== null) && 
+                (<Form.Control
+                  as="textarea" 
+                  rows={4}
+                  name='prompt'
+                  placeholder='e.g. Email marketing, Fourier transform, linear regression model...'
+                />)}
+              </Form.Group>
+              {(init || api_key !== null) && (<div className="d-flex flex-column justify-content-center align-items-center">
+                <Button type='submit' className='my-3 w-100' disabled={quoteLoading}>
+                  Submit
+                </Button>  
+                <Button onClick={() => {localStorage.clear(); window.location.reload()}} type='submit' className='my-2 w-100' disabled={quoteLoading}>
+                  Use another key
+                </Button>           
+              </div>)}
+            </Form>
+          </div>
         {quoteLoading && <Spinner animation='border' />}
         {quoteLoadingError && "Something went wrong. Please try again."}
         {matches && 
@@ -90,11 +176,17 @@ const HomePage = () => {
             {matches.map((match, index) => {
               let text = match.replace(/^\d+\.\s*/, '')
               return (
-              <div className={`${styles.card} m-2 border d-flex justify-content-center align-items-center rounded p-4 position-relative`} key={index}>
-                <span className="fs-6 my-2">{text}</span>
-                <div className="position-absolute end-0 bottom-0 p-1 d-flex">
-                  <i className="bi-arrow-clockwise mx-2" role="button" onClick={() => handleText(text)}></i>
-                  <i className="bi-clipboard" role="button" onClick={() => copy(text)}></i>
+              <div className={`${styles.card} m-2 border d-flex justify-content-center align-items-center rounded px-4 pb-4 position-relative`} key={index}>
+                <span className="fs-6 my-4">{text}</span>
+                <div className="position-absolute end-0 bottom-0 p-1 d-flex mb-1">
+                  <Button className={`${styles.action_btn} mx-1`} onClick={() => handleText(text)}>
+                    Refine
+                  </Button> 
+                  <Button className={`${styles.action_btn} mx-2`} onClick={() => copy(text)}>
+                    Copy
+                  </Button> 
+                  {/* <i className="bi-arrow-clockwise mx-2" role="button" onClick={() => handleText(text)}></i>
+                  <i className="bi-clipboard" role="button" onClick={() => copy(text)}></i> */}
                 </div>
               </div>
             )})}
