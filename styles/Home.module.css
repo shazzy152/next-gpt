@@ -20,7 +20,7 @@
   flex-direction: row;
   flex-wrap: wrap;
   position: relative;
-  top: 100px;
+  top: 30px;
   max-width: 98%;
   align-items:center;
 }
