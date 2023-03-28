@@ -140,7 +140,7 @@ const HomePage = () => {
                     />
                   </div>
                   <div className="d-flex justify-content-between w-100 align-items-center p-3">
-                    <Form.Label className="text-nowrap">Open AI API key :</Form.Label>
+                    <Form.Label className="text-nowrap"><a target="_blank" href='https://platform.openai.com/account/api-keys'>Open AI API key</a> :</Form.Label>
                     <Form.Control
                       className="w-75 ms-3"
                       name='api_key'
@@ -185,8 +185,6 @@ const HomePage = () => {
                   <Button className={`${styles.action_btn} mx-2`} onClick={() => copy(text)}>
                     Copy
                   </Button> 
-                  {/* <i className="bi-arrow-clockwise mx-2" role="button" onClick={() => handleText(text)}></i>
-                  <i className="bi-clipboard" role="button" onClick={() => copy(text)}></i> */}
                 </div>
               </div>
             )})}
