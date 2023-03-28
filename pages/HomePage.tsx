@@ -13,6 +13,7 @@ const HomePage = () => {
     name: "",
     occupation:""
   })
+  const [count, setCount] = useState(0);
 
   let api_key;
 
@@ -156,9 +157,12 @@ const HomePage = () => {
                   as="textarea" 
                   rows={4}
                   name='prompt'
+                  maxLength={250}
                   placeholder='e.g. Email marketing, Fourier transform, linear regression model...'
+                  onChange={e => setCount(e.target.value.length)}
                 />)}
               </Form.Group>
+              <span>{count > 250 ? "Exceeded character limit. kindly keep the prompt within 250 characters" : ""}</span>
               {(init || api_key !== null) && (<div className="d-flex flex-column justify-content-center align-items-center">
                 <Button type='submit' className='my-3 w-100' disabled={quoteLoading}>
                   Submit
@@ -170,7 +174,7 @@ const HomePage = () => {
             </Form>
           </div>
         {quoteLoading && <Spinner animation='border' />}
-        {quoteLoadingError && "Something went wrong. Please try again."}
+        {quoteLoadingError && "Server took too lng to respond. Please try again."}
         {matches && 
           <div className={`${styles.quotecard} p-2`}>
             {matches.map((match, index) => {
