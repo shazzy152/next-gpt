@@ -9,6 +9,8 @@ export default async function handler(
   const prompt = req.query.prompt;
   const key = req.query.key;
 
+  console.log(key,prompt, 'fvfvfv')
+
   if(key){
     
   const configuration = new Configuration({

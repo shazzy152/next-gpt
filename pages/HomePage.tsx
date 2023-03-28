@@ -26,7 +26,8 @@ const HomePage = () => {
   async function keyStore() {
     setInit(true)
     if (typeof window !== 'undefined') {
-     localStorage.setItem("API_KEY", JSON.stringify(key))
+      // @ts-ignore
+     localStorage.setItem("API_KEY", key)
     }   
 
     try {
@@ -39,7 +40,6 @@ const HomePage = () => {
       });
   
       const data = await response.json();
-      console.log('Response:', data);
     } catch (error) {
       console.error('Error:', error);
     }
@@ -56,7 +56,7 @@ const HomePage = () => {
         setQuoteLoadingError(false);
         setQuoteLoading(true);
 
-        const response = await fetch(`/api/gptapi?prompt=${prompt}&key=${key}`);
+        const response = await fetch(`/api/gptapi?prompt=${prompt}&key=${key?.toString()}`);
         const body = await response.json();
         setQuote(body.quote);
       } catch (error) {
@@ -75,8 +75,8 @@ const HomePage = () => {
         setQuote("");
         setQuoteLoadingError(false);
         setQuoteLoading(true);
-
-        const response = await fetch(`/api/gptapi?prompt=${text}&key=${key}`);
+        const prompt = text?.toString().trim();
+        const response = await fetch(`/api/gptapi?prompt=${prompt}&key=${key?.toString()}`);
         const body = await response.json();
         setQuote(body.quote);
       } catch (error) {
