@@ -148,7 +148,7 @@ const HomePage = () => {
                       onChange={(e) => setKey(e.target.value)}
                     />
                   </div>
-                  <Button disabled={user.name && user.occupation ? false : true} onClick={() => keyStore()} className='my-3 w-25'>
+                  <Button disabled={user.name && user.occupation && key ? false : true} onClick={() => keyStore()} className='my-3 w-25'>
                     Submit
                   </Button>  
                 </div>)}
