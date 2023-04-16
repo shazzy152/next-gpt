@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import styles from '@/styles/Home.module.css'
 import { Form, Button, Spinner } from 'react-bootstrap'
 import { FormEvent, useState } from 'react'
+import axios from 'axios'
 
 const HomePage = () => {
 
@@ -9,6 +10,7 @@ const HomePage = () => {
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [quoteLoadingError, setQuoteLoadingError] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [errStatus, setErrStatus] = useState<number>();
   const [user, setUser] = useState({
     name: "",
     occupation:""
@@ -57,7 +59,13 @@ const HomePage = () => {
         setQuoteLoadingError(false);
         setQuoteLoading(true);
 
-        const response = await fetch(`/api/gptapi?prompt=${prompt}&key=${key?.toString()}`);
+        const response = await fetch(`/api/gptapi?prompt=${prompt}&key=${key?.toString()}`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        setErrStatus(response.status)
         const body = await response.json();
         setQuote(body.quote);
       } catch (error) {
@@ -77,7 +85,12 @@ const HomePage = () => {
         setQuoteLoadingError(false);
         setQuoteLoading(true);
         const prompt = text?.toString().trim();
-        const response = await fetch(`/api/gptapi?prompt=${prompt}&key=${key?.toString()}`);
+        const response = await fetch(`/api/gptapi?prompt=${prompt}&key=${key?.toString()}`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
         const body = await response.json();
         setQuote(body.quote);
       } catch (error) {
@@ -146,6 +159,7 @@ const HomePage = () => {
                       className="w-75 ms-3"
                       name='api_key'
                       onChange={(e) => setKey(e.target.value)}
+                      placeholder="Click on label to generate new key"
                     />
                   </div>
                   <Button disabled={user.name && user.occupation && key ? false : true} onClick={() => keyStore()} className='my-3 w-25'>
@@ -162,7 +176,7 @@ const HomePage = () => {
                   onChange={e => setCount(e.target.value.length)}
                 />)}
               </Form.Group>
-              <span>{count > 250 ? "Exceeded character limit. kindly keep the prompt within 250 characters" : ""}</span>
+              <span>{count > 249 ? "Exceeded character limit. kindly keep the prompt within 250 characters" : ""}</span>
               {(init || api_key !== null) && (<div className="d-flex flex-column justify-content-center align-items-center">
                 <Button type='submit' className='my-3 w-100' disabled={quoteLoading}>
                   Submit
@@ -174,7 +188,7 @@ const HomePage = () => {
             </Form>
           </div>
         {quoteLoading && <Spinner animation='border' />}
-        {quoteLoadingError && "Server took too lng to respond. Please try again."}
+        {(errStatus === 500) ? <span>Looks like Your OpenAI API Free Trial has expired. You can check your status <a target="_blank" href='https://platform.openai.com/account/usage'>here</a></span> : quoteLoadingError ? "Server took too long to respond. Please try again." : ""}
         {matches && 
           <div className={`${styles.quotecard} p-2`}>
             {matches.map((match, index) => {
