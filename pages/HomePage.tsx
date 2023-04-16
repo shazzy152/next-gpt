@@ -134,7 +134,7 @@ const HomePage = () => {
         </div>
           <div className="d-flex justify-content-center w-100">
             <Form onSubmit={handleSubmit} className={`${styles.inputForm} d-flex flex-column justify-content-center align-items-center`}>
-              <Form.Group className='mb-3 w-75' controlId='prompt-input'>
+              <Form.Group className='mb-3 w-100' controlId='prompt-input'>
                 {(api_key === null) && 
                 (<div>
                   <div className="d-flex justify-content-between w-100 align-items-center p-3">

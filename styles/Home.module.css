@@ -7,7 +7,11 @@
 }
 
 .inputForm {
-  width: 50%;
+  width: 40%;
+}
+
+.form-group{
+  border: 1px solid blue;
 }
 
 .signOut{
@@ -41,7 +45,7 @@
 
 @media only screen and (max-width: 1000px){
 	.inputForm{
-    width: 80%;
+    width: 100%;
   }
   .quotecard{
     flex-direction: column;
